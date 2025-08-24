@@ -32,36 +32,37 @@ class ConfirmationDialogMobile extends StatefulWidget {
 
 class _ConfirmationDialogMobileState extends State<ConfirmationDialogMobile> {
   Future<void> createOrder(BuildContext context) async {
-  final orderProvider = Provider.of<OrderProvider>(context, listen: false);
-  try {
-    bool hasInternet =
-        await InternetConnectionChecker.createInstance().hasConnection;
-    if (!hasInternet) {
-      cupertinoDialog(
-        context,
-        isSuccess: false,
-        'Please connect to the internet to Place Order',
-      );
-      return;
-    }
-    await orderProvider.uploadCurrentOrder(context);
-    
-    if (!mounted) return;
-    Navigator.pop(context);
+    final orderProvider = Provider.of<OrderProvider>(context, listen: false);
+    try {
+      bool hasInternet =
+          await InternetConnectionChecker.createInstance().hasConnection;
+      if (!hasInternet) {
+        cupertinoDialog(
+          context,
+          isSuccess: false,
+          'Please connect to the internet to Place Order',
+        );
+        return;
+      }
+      await orderProvider.uploadCurrentOrder(context);
 
-    // Use Future.microtask to ensure dialog shows after navigation completes
-    Future.microtask(() {
       if (!mounted) return;
-      cupertinoDialog(context, 'Your Order is Placed Successfully');
-    });
-  } catch (e) {
-    print('Error adding product: $e');
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to add product: $e'))
-    );
+      Navigator.pop(context);
+
+      // Use Future.microtask to ensure dialog shows after navigation completes
+      Future.microtask(() {
+        if (!mounted) return;
+        cupertinoDialog(context, 'Your Order is Placed Successfully');
+      });
+    } catch (e) {
+      print('Error adding product: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to add product: $e')));
+    }
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
